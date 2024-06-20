@@ -1,3 +1,4 @@
+// Codigo que funciona com display associado
 #define boiaNivelAlto                  22
 #define boiaNivelBaixoBruta            23
 #define boiaNivelBaixoTanqueFloushing  24
