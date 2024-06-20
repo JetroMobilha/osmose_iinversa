@@ -1,4 +1,12 @@
 // Codigo que funciona com display associado
+
+// Inicialização do LDC
+#include <LiquidCrystal.h>
+
+const int rs = 12, en = 11, d4 = 5, d3 = 4, d2 = 3, d1 = 2;
+LiquidCrystal lcd(rs, en, d4, d3, d2, d1);
+// Inicialização LDC
+
 #define boiaNivelAlto                  22
 #define boiaNivelBaixoBruta            23
 #define boiaNivelBaixoTanqueFloushing  24
@@ -25,7 +33,7 @@ bool machine=false;
 bool machineRun=false;
 bool mudarAlarme=true;
 bool mPressostatoNivelAlto=0;
-bool mBoiaNivelBaixoBruta=1;
+bool mBoiaNivelBaixoBruta=0;
 bool mPressostatoNivelBaixo=0;
 bool mBoiaNivelBaixoTanqueFlousing=0;
 bool mBoiaNivelAltoTanqueFlousing =0;
@@ -38,6 +46,7 @@ bool mLavagemFiltroTermino=0;
 bool mEmFlouching=0;
 bool mFuncionamentobombaAltaPressao=0;
 int cont1=0;
+String textoDisplay="Inicializando";
  
 // Variaveis usadas para reconhecer quais dos alermes ja foi edentificado 
 int alarme=0;
@@ -65,11 +74,15 @@ bool isRun();
 void reSetAlarme();
 void filtroLava();
 void sistemaEmBaixaPresao();
+void mensagemDisplay(String titulo,String descrisao);
 
 
 
 void setup() 
 {
+  lcd.begin(16, 2);
+  lcd.print(textoDisplay);
+  
   Serial.begin(9600);
   
   //entradas
@@ -121,12 +134,10 @@ void loop()
   Serial.println(machine);
   Serial.print("machineRun = ");
   Serial.println(machineRun);
-  Serial.print("Verificando = ");
-  Serial.println(verifcandoAlarme());
   if(machine && !machineRun && mEmFlouching==0)
-  {
-    Serial.println("opcao3");
+  { 
     ligarSaidas();
+    mensagemDisplay("Valvula ","Entrada Aberta");
     verificarPressaoB();    
   }
   else if(verifcandoAlarme()) desligarMaquina();
@@ -139,7 +150,6 @@ void loop()
     alarme=1;
     tipoAlarme5=true;
     desligarMaquina();
-    Serial.println("Alarme de Paixa pressão");
   }
 
   sistemaEmBaixaPresao();
@@ -156,11 +166,12 @@ void encherTanqueFloushing()
   {
     Serial.println("encher TanqueFloushing");
     digitalWrite(valvulaFloushing ,LOW);
+    mensagemDisplay("Osmose","Encher Floushi");
   }
   else
   {   
-    //Serial.println("tanque cheio");
     digitalWrite(valvulaFloushing ,HIGH);
+    mensagemDisplay("Osmose","Em Producao");
   }
 }
 
@@ -168,6 +179,7 @@ void tanqueCheio()
 {
   if(mBoiaNivelAlto == 0 && mBoiaNivelBaixoTanqueFlousing ==1 && machineRun==true )
   {
+    mensagemDisplay("Osmose","Em Floushing");
     Serial.println("Iniciar Floushing");
     mEmFlouching=1;
     desligarSaidas();  
@@ -176,6 +188,7 @@ void tanqueCheio()
   { 
     mEmFlouching=0;
     desligarMaquina();
+    mensagemDisplay("Osmose","Tanque Cheio");
   } 
 }
 
@@ -186,11 +199,12 @@ void sistemaEmBaixaPresao()
     Serial.println("Iniciar Floushing por baixa pressão");
     ligarBombaAltaPressao();  
     mEmFlouching=1;
+    mensagemDisplay("Osmose","Em Floushing");
   }
-  else if(tipoAlarme5 == true){ 
-    
+  else if(tipoAlarme5 == true &&  machineRun == 0){ 
     mEmFlouching=0;
     Serial.println("Fim Floushing por baixa pressão");
+    mensagemDisplay("Osmose Parado","Baixa Pressao");
     desligarBombaAltaPressao();
     desligarSaidas();
     alarme=0;
@@ -202,14 +216,13 @@ void sistemaEmBaixaPresao()
 void verificarPressaoB()
 {  
   Serial.println("Esperando pressao do sistema ...");
-  
   delay(4000);
   
   if(mPressostatoNivelBaixo == 1 && cont1 <3)
   {
     ligarBombaAltaPressao();
-    
     machineRun=true;
+    mensagemDisplay("Osmose","Em Producao");
   }
   else
   {
@@ -295,8 +308,6 @@ void reSetAlarme()
     alarme=0;
     tipoAlarme5=0;
   }
-  
-  
 }
 
 bool verifcandoAlarme()
@@ -312,51 +323,56 @@ bool verifcandoAlarme()
 void definirAlarme()
 {
   // verificando se o alarme aparece pela primeiravez
-  if(mPressostatoNivelAlto==0 && tipoAlarme1==false) 
-  {
-    alarme=1;
-    machine=false;
-    machineRun=false;
-    tipoAlarme1=true;
-    Serial.println("Alarme Pressostato Nivel Alto");
-  }else if(mPressostatoNivelAlto==0){
+  if(mPressostatoNivelAlto==0){
+    if(mPressostatoNivelAlto==0 && tipoAlarme1==false){
+      alarme=1;
+      machine=false;
+      machineRun=false;
+      tipoAlarme1=true;
+    } 
+
+    mensagemDisplay("Alarme","Pressotato Alt");
     Serial.println("Alarme Pressostato Nivel Alto");
   } 
 
-  if(mAvariaBombaAltaPressao==1 && tipoAlarme2==false) 
-  {
-    alarme=1;
-    machine=false;
-    machineRun=false;
-    tipoAlarme2=true;
+  if(mAvariaBombaAltaPressao==1){
+    if(mAvariaBombaAltaPressao==1 && tipoAlarme2==false){
+      alarme=1;
+      machine=false;
+      machineRun=false;
+      tipoAlarme2=true;
+    } 
+
+    mensagemDisplay("Alarme","Bomba Alt");
     Serial.println("Alarme Avaria Bomba Alta Pressao");
-  } else if(mAvariaBombaAltaPressao==1){
-     Serial.println("Alarme Avaria Bomba Alta Pressao");
   } 
 
-  if( mAvariaBombaDoseadora==0 && tipoAlarme3==false) 
-  {
-    alarme=1;
-    machine=false;
-    machineRun=false;
-    tipoAlarme3=true;
+  if( mAvariaBombaDoseadora==0){
+    if( mAvariaBombaDoseadora==0 && tipoAlarme3==false){
+      alarme=1;
+      machine=false;
+      machineRun=false;
+      tipoAlarme3=true;  
+    }  
+
+    mensagemDisplay("Alarme","Doseadora");
     Serial.println("Alarme Avaria Bomba Doseadora");
-  } else if(mAvariaBombaDoseadora==0){
-     Serial.println("Alarme Avaria Bomba Doseadora");
   } 
 
-  if( mReleSequenciaFase==0 && tipoAlarme4==false) 
-  {
-    alarme=1;
-    machine=false;
-    machineRun=false;
-    tipoAlarme4=true;
-    Serial.println("Alarme Rele Sequencia Fase");
-  }else if(mReleSequenciaFase==0){
+  if( mReleSequenciaFase==0){
+    if( mReleSequenciaFase==0 && tipoAlarme4==false){
+      alarme=1;
+      machine=false;
+      machineRun=false;
+      tipoAlarme4=true;
+    } 
+
+    mensagemDisplay("Alarme","Sequencia Fase");
     Serial.println("Alarme Rele Sequencia Fase");
   } 
 
   if(mPressostatoNivelBaixo==0 && tipoAlarme5==true){
+    mensagemDisplay("Alarme","BAIXA PRESSAO");
     Serial.println("ALARME BAIXA PRESSAO");
   } 
 }
@@ -380,19 +396,18 @@ bool isRun()
 
 void leituraEntradas()
 {
-    mBoiaNivelAlto = digitalRead(boiaNivelAlto);
-   //leitura2 = digitalRead(boiaNivelAlto);                              
-  // mBoiaNivelBaixoBruta = digitalRead(boiaNivelBaixoBruta);                     
-   mBoiaNivelBaixoTanqueFlousing = digitalRead(boiaNivelBaixoTanqueFloushing);  
-   mBoiaNivelAltoTanqueFlousing =digitalRead(boiaNivelAltoTanqueFloushing);
-   mPressostatoNivelBaixo =digitalRead(pressostatoNivelBaixo);          
-   mPressostatoNivelAlto =digitalRead(pressostatoNivelAlto);           
-   mAvariaBombaAltaPressao =digitalRead(avariaBombaAltaPressao);        
-   mAvariaBombaDoseadora =digitalRead(avariaBombaDoseadoraRO);         
-   mLavagemFiltro=digitalRead(lavagemFiltro);                 
-   //mReleSequenciaFase =digitalRead(releSequenciaFase);              
-   mFuncionamentobombaAltaPressao =digitalRead(funcionamentobombaAltaPressao);  
-   mRearmeAlarme =digitalRead(rearmeAlarme); 
+  mBoiaNivelAlto = digitalRead(boiaNivelAlto);                          
+  mBoiaNivelBaixoBruta = digitalRead(boiaNivelBaixoBruta);                     
+  mBoiaNivelBaixoTanqueFlousing = digitalRead(boiaNivelBaixoTanqueFloushing);  
+  mBoiaNivelAltoTanqueFlousing =digitalRead(boiaNivelAltoTanqueFloushing);
+  mPressostatoNivelBaixo =digitalRead(pressostatoNivelBaixo);          
+  mPressostatoNivelAlto =digitalRead(pressostatoNivelAlto);           
+  mAvariaBombaAltaPressao =digitalRead(avariaBombaAltaPressao);        
+  mAvariaBombaDoseadora =digitalRead(avariaBombaDoseadoraRO);         
+  mLavagemFiltro=digitalRead(lavagemFiltro);                 
+  mReleSequenciaFase =digitalRead(releSequenciaFase);              
+  mFuncionamentobombaAltaPressao =digitalRead(funcionamentobombaAltaPressao);  
+  mRearmeAlarme =digitalRead(rearmeAlarme); 
 }//endleituraEntradas
 
 void ligarSaidas()
@@ -447,8 +462,18 @@ void contador(){
 void filtroLava(){
   if(mLavagemFiltro==1)
   {
+    mensagemDisplay("Filtro","Em Lavagem");
     Serial.println("Filtro em lavagem");
-     desligarMaquina();
-     mLavagemFiltroTermino=1;
+    desligarMaquina();
+    mLavagemFiltroTermino=1;
   }
+}
+
+void mensagemDisplay(string titulo="",string descrisao=""){
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print(titulo);
+
+  lcd.setCursor(0, 1);
+  lcd.print(descrisao);
 }
