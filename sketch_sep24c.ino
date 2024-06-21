@@ -3,28 +3,28 @@
 // Inicialização do LDC
 #include <LiquidCrystal.h>
 
-const int rs = 12, en = 11, d4 = 5, d3 = 4, d2 = 3, d1 = 2;
+const int rs = 12, en = 11, d4 = 10, d3 =9, d2 = 8, d1 = 7;
 LiquidCrystal lcd(rs, en, d4, d3, d2, d1);
 // Inicialização LDC
 
-#define boiaNivelAlto                  22
-#define boiaNivelBaixoBruta            23
-#define boiaNivelBaixoTanqueFloushing  24
-#define boiaNivelAltoTanqueFloushing   25
-#define pressostatoNivelBaixo          26
-#define pressostatoNivelAlto           27
-#define avariaBombaAltaPressao         28
-#define avariaBombaDoseadoraRO         29
-#define lavagemFiltro                  30
-#define releSequenciaFase              31
-#define funcionamentobombaAltaPressao  32
-#define rearmeAlarme                   33              
+#define boiaNivelAlto                  27
+#define boiaNivelBaixoBruta            28
+#define boiaNivelBaixoTanqueFloushing  29
+#define boiaNivelAltoTanqueFloushing   30
+#define pressostatoNivelBaixo          31
+#define pressostatoNivelAlto           32
+#define avariaBombaAltaPressao         33
+#define avariaBombaDoseadoraRO         34
+#define lavagemFiltro                  35
+#define releSequenciaFase              36
+#define funcionamentobombaAltaPressao  37
+#define rearmeAlarme                   38              
 //Saída
-#define led                            8
-#define valvulaEntrada                 7
-#define valvulaFloushing               6
-#define ordemFuncioBombaAltaPressao    5
-#define ordemFuncioBombaDoseadora      4
+#define led                            22
+#define valvulaEntrada                 23
+#define valvulaFloushing               24
+#define ordemFuncioBombaAltaPressao    25
+#define ordemFuncioBombaDoseadora      26
 
 
 bool mBoiaNivelAlto=0;
@@ -47,6 +47,7 @@ bool mEmFlouching=0;
 bool mFuncionamentobombaAltaPressao=0;
 int cont1=0;
 String textoDisplay="Inicializando";
+String textoDisplayDescricao=" ";
  
 // Variaveis usadas para reconhecer quais dos alermes ja foi edentificado 
 int alarme=0;
@@ -469,7 +470,10 @@ void filtroLava(){
   }
 }
 
-void mensagemDisplay(string titulo="",string descrisao=""){
+void mensagemDisplay(String titulo="",String descrisao=""){
+
+  textoDisplay= titulo;
+  textoDisplayDescricao= descrisao;
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print(titulo);
