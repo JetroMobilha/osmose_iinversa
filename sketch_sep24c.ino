@@ -3,6 +3,7 @@
 // Inicialização do LDC
 #include <LiquidCrystal.h>
 
+
 const int rs = 12, en = 11, d4 = 10, d3 =9, d2 = 8, d1 = 7;
 LiquidCrystal lcd(rs, en, d4, d3, d2, d1);
 // Inicialização LDC
@@ -48,6 +49,7 @@ bool mFuncionamentobombaAltaPressao=0;
 int cont1=0;
 String textoDisplay="Inicializando";
 String textoDisplayDescricao=" ";
+bool contV= true;
  
 // Variaveis usadas para reconhecer quais dos alermes ja foi edentificado 
 int alarme=0;
@@ -131,14 +133,10 @@ void loop()
  
   filtroLava();
 
-  Serial.print("machine = ");
-  Serial.println(machine);
-  Serial.print("machineRun = ");
-  Serial.println(machineRun);
   if(machine && !machineRun && mEmFlouching==0)
   { 
     ligarSaidas();
-    mensagemDisplay("Valvula ","Entrada Aberta");
+    mensagemDisplay("Valvula","Entrada Aberta");
     verificarPressaoB();    
   }
   else if(verifcandoAlarme()) desligarMaquina();
@@ -154,9 +152,8 @@ void loop()
   }
 
   sistemaEmBaixaPresao();
-
-  delay(1000);
-   
+  delay(2000);
+   Serial.println("----------------------------------------------------------------------------------------------------------");
 }//END loop
 
 
@@ -463,7 +460,7 @@ void contador(){
 void filtroLava(){
   if(mLavagemFiltro==1)
   {
-    mensagemDisplay("Filtro","Em Lavagem");
+    mensagemDisplay("filtro","em lavagem");
     Serial.println("Filtro em lavagem");
     desligarMaquina();
     mLavagemFiltroTermino=1;
@@ -471,7 +468,6 @@ void filtroLava(){
 }
 
 void mensagemDisplay(String titulo="",String descrisao=""){
-
   textoDisplay= titulo;
   textoDisplayDescricao= descrisao;
   lcd.clear();
